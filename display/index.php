@@ -9,8 +9,8 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skapsya100 — Layar Kuis</title>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css">
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/anim.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css?v=20261031a">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/anim.css?v=20261031a">
 </head>
 <body class="display" data-base="<?= BASE_PATH ?>">
 <canvas id="kanvas-konfeti"></canvas>
@@ -147,8 +147,8 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
   <button class="tombol-bulat" id="btn-full"><span class="ikon">⛶</span><span class="label">LAYAR</span></button>
 </div>
 
-<script src="<?= BASE_PATH ?>/assets/js/sfx.js"></script>
-<script src="<?= BASE_PATH ?>/assets/js/confetti.js"></script>
-<script src="<?= BASE_PATH ?>/assets/js/display.js"></script>
+<script src="<?= BASE_PATH ?>/assets/js/sfx.js?v=20261031a"></script>
+<script src="<?= BASE_PATH ?>/assets/js/confetti.js?v=20261031a"></script>
+<script src="<?= BASE_PATH ?>/assets/js/display.js?v=20261031a"></script>
 </body>
 </html>
