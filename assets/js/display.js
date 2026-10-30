@@ -41,6 +41,17 @@
       }
       a.innerHTML = aw;
     }
+    var c = $('konfeti-latar');
+    if (c) {
+      var warna = ['#ffd166', '#ef476f', '#06d6a0', '#4cc9f0', '#f78c6b', '#b388ff'];
+      var kh = '';
+      for (var k = 0; k < 16; k++) {
+        kh += '<span style="left:' + (Math.random() * 100) + 'vw;background:' +
+          warna[k % warna.length] + ';animation-duration:' + (4 + Math.random() * 4).toFixed(1) +
+          's;animation-delay:' + (-Math.random() * 8).toFixed(1) + 's"></span>';
+      }
+      c.innerHTML = kh;
+    }
   }
 
   /* ---------- API ---------- */
@@ -128,18 +139,28 @@
       if (j && j.ok) {
         token = j.token;
         localStorage.setItem('skapsya_token', token);
-        $('kode-pair-teks').textContent = j.kode;
+        tulisKode(j.kode);
         poll();
       } else {
-        $('kode-pair-teks').textContent = '····';
+        tulisKode('····');
         setTimeout(pasang, 3000);
       }
     });
   }
 
+  /* Tulis kode pairing ke 4 kotak. */
+  function tulisKode(kode) {
+    kode = String(kode || '····').substring(0, 4);
+    for (var i = 0; i < 4; i++) {
+      var el = $('kode-' + i);
+      if (el) el.textContent = kode[i] || '·';
+    }
+  }
+
   /* ---------- Tampil layar ---------- */
   var LAYAR = ['beranda', 'setup', 'kuis', 'selesai'];
   function tampil(nama) {
+    document.body.classList.toggle('di-beranda', nama === 'beranda');
     LAYAR.forEach(function (l) {
       var el = $('layar-' + l);
       if (el) el.classList.toggle('tampil', l === nama);
@@ -670,12 +691,20 @@
       if (ok) {
         SFX.klik();
         SFX.mulaiMusik();
-        this.textContent = '🔊 Suara Aktif';
+        $('ikon-suara').textContent = '🔊';
+        this.classList.add('aktif');
         // Masuk layar penuh sekali
         var el = document.documentElement;
         if (el.requestFullscreen) el.requestFullscreen().catch(function () {});
       } else {
         pesan('Audio tidak didukung browser ini.');
+      }
+    };
+    $('btn-full').onclick = function () {
+      SFX.klik();
+      if (document.fullscreenElement) document.exitFullscreen().catch(function () {});
+      else if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(function () {});
       }
     };
     $('btn-setup-kembali').onclick = function () {

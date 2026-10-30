@@ -175,37 +175,155 @@ body.display {
 .layar { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: relative; }
 .layar.tampil { display: flex; }
 
-/* Beranda */
-.logo-utama { text-align: center; position: relative; }
-.logo-teks {
-  font-size: 11vmin; font-weight: 900; margin: 0; letter-spacing: 2px;
-  background: linear-gradient(180deg, #fff 20%, var(--emas) 55%, #e08e00 80%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(0 6px 0 rgba(0,0,0,.35));
-  position: relative; overflow: hidden;
+/* Beranda — panggung game-show */
+body.display {
+  background:
+    radial-gradient(ellipse 90vmin 42vmin at 50% 108%, #2f6bd8aa, transparent 70%),
+    radial-gradient(ellipse at 50% 16%, #2a5db0 0%, #17356e 45%, #0b1e3a 78%);
 }
-.logo-teks .angka { font-size: 15vmin; }
-.logo-sub { font-size: 3.4vmin; letter-spacing: 1.4vmin; color: #cfe0ff; margin: 1vmin 0 3vmin; }
+.panggung { z-index: 1; }
+.panggung-latar { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.sorot {
+  position: absolute; top: -10vmin; width: 26vmin; height: 120vmin;
+  background: linear-gradient(180deg, #cfe6ff44, #cfe6ff11 70%, transparent);
+  clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%);
+  filter: blur(1vmin); transform-origin: top center;
+}
+.sorot-kiri { left: 5vw; animation: sorot-goyang 7s ease-in-out infinite; }
+.sorot-tengah { left: 42vw; width: 20vmin; animation: sorot-goyang 11s ease-in-out infinite reverse; }
+.sorot-kanan { right: 5vw; animation: sorot-goyang 9s ease-in-out infinite reverse; }
+.lengkung {
+  position: absolute; top: 50%; width: 120vmin; height: 120vmin; border-radius: 50%;
+  border: 1.6vmin solid #f4b942; transform: translateY(-50%);
+  outline: 1vmin dotted #fffdf5; outline-offset: 1.4vmin;
+  box-shadow: 0 0 6vmin #f4b94288, inset 0 0 6vmin #00000066;
+}
+.lengkung-kiri { left: -96vmin; }
+.lengkung-kanan { right: -96vmin; }
+.lantai-latar {
+  position: absolute; left: 50%; bottom: -15vmin; width: 155vmin; height: 34vmin;
+  transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(ellipse, #4d8dff55, #12294f00 70%);
+  border-top: .8vmin solid #7fb2ff44;
+}
+.konfeti-latar { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; display: none; }
+body.di-beranda .konfeti-latar { display: block; }
+.konfeti-latar span {
+  position: absolute; top: -4vmin; width: 1.6vmin; height: 2.6vmin;
+  border-radius: .4vmin; animation: konfeti-jatuh linear infinite;
+}
+/* Logo lencana */
+.logo-panggung { position: relative; text-align: center; margin-bottom: 1.5vmin; }
+.semburan {
+  position: absolute; left: 50%; top: 50%; width: 76vmin; height: 76vmin;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  background: repeating-conic-gradient(#ffd1662e 0 6deg, transparent 6deg 12deg);
+  -webkit-mask: radial-gradient(circle, #000 0 32%, transparent 68%);
+  mask: radial-gradient(circle, #000 0 32%, transparent 68%);
+  animation: semburan-putar 40s linear infinite;
+}
+.lencana {
+  position: relative; display: inline-block; padding: 2.2vmin 7vmin 1.8vmin;
+  background: radial-gradient(ellipse at 50% 35%, #e63946 0%, #b30f22 55%, #6e0413 100%);
+  border: 1vmin solid #f4b942; border-radius: 50%;
+  box-shadow: 0 0 0 .6vmin #7a4a00, 0 0 5vmin #ffb300aa, 0 1.5vmin 0 #00000055;
+  transform: rotate(-3deg);
+}
+.logo-skapsya {
+  font-family: "Arial Black", "Segoe UI", sans-serif; font-weight: 900;
+  font-size: 9.5vmin; letter-spacing: .5vmin; line-height: 1.05;
+  background: linear-gradient(180deg, #fff7d6 8%, #ffd166 38%, #f4a900 55%, #8a5200 78%, #ffd166 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: .22vmin #3d2600;
+  filter: drop-shadow(0 .5vmin 0 #12306b) drop-shadow(0 1vmin .6vmin #00000088);
+}
+.logo-100 {
+  font-family: "Arial Black", "Segoe UI", sans-serif; font-weight: 900;
+  font-size: 11vmin; line-height: 1; letter-spacing: 1vmin; margin-top: -.5vmin;
+  background: linear-gradient(180deg, #ffffff 15%, #ffe9c4 40%, #f4a900 62%, #ffffff 88%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: .22vmin #7a0018;
+  filter: drop-shadow(0 .5vmin 0 #5c0313) drop-shadow(0 1vmin .6vmin #00000088);
+}
+.kilau-bintang {
+  position: absolute; color: #fff; text-shadow: 0 0 2vmin #fff, 0 0 4vmin #ffd166;
+  animation: kilau-kedip 1.8s ease-in-out infinite; pointer-events: none;
+}
+.k1 { left: 4%; top: 4%; font-size: 4vmin; }
+.k2 { right: 6%; top: -2%; font-size: 5vmin; animation-delay: .6s; }
+.k3 { left: 10%; bottom: -2%; font-size: 3vmin; animation-delay: 1.1s; }
+.k4 { right: 2%; bottom: 10%; font-size: 3.6vmin; animation-delay: 1.4s; }
+.bintang-logo {
+  position: absolute; color: #ffd166; text-shadow: 0 0 2vmin #ff9d00;
+  animation: bintang-ceria 3s ease-in-out infinite; pointer-events: none;
+}
+.b1 { left: -6%; top: 30%; font-size: 6vmin; }
+.b2 { right: -7%; top: 20%; font-size: 7vmin; animation-delay: 1s; }
+.b3 { left: 18%; top: -16%; font-size: 4vmin; animation-delay: .5s; }
+/* Tombol MULAI hijau */
+.btn-mulai {
+  position: relative; overflow: hidden;
+  font-size: 5vmin; font-weight: 900; letter-spacing: .5vmin;
+  padding: 1.4vmin 9vmin; border-radius: 999px; cursor: pointer;
+  color: #fff; text-shadow: 0 .4vmin 0 #0a5c22;
+  background: linear-gradient(180deg, #b6ff7a 0%, #4fe35a 30%, #16a34a 60%, #0a7d2c 100%);
+  border: .6vmin solid #eaffea;
+  box-shadow: 0 .8vmin 0 #064d1c, 0 0 4vmin #4fe35a99, inset 0 .8vmin 1vmin #ffffff88;
+}
+.btn-mulai:active { transform: translateY(.6vmin); box-shadow: 0 .2vmin 0 #064d1c, 0 0 4vmin #4fe35a99; }
+.btn-mulai .segitiga { font-size: 4vmin; }
+.btn-mulai::after {
+  content: ""; position: absolute; top: -20%; bottom: -20%; width: 22%; left: -30%;
+  background: linear-gradient(100deg, transparent, #ffffffaa, transparent);
+  transform: skewX(-20deg); animation: sapu-tombol 3.2s ease-in-out infinite;
+}
+/* Pil kode remot + tagline */
+.kode-remot {
+  display: flex; align-items: center; gap: 1.6vmin; margin-top: 2.2vmin;
+  background: linear-gradient(180deg, #123a8f, #0a2472);
+  border: .5vmin solid #f4b942; border-radius: 999px;
+  padding: 1.1vmin 3.4vmin; box-shadow: 0 0 3vmin #00000088, inset 0 .4vmin .8vmin #ffffff33;
+}
+.ikon-remot svg { width: 5vmin; height: 5vmin; display: block; }
+.label-remot { font-size: 2.2vmin; font-weight: 900; line-height: 1.15; color: #fff; text-align: left; }
+.kotak-kode {
+  width: 7vmin; height: 7.4vmin; border-radius: 1.4vmin;
+  background: linear-gradient(180deg, #ffffff, #dbe6ff);
+  color: #0a2472; font-size: 4.4vmin; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 -.6vmin 0 #9fb4d8, 0 .4vmin 0 #00000055;
+}
+.tagline {
+  margin-top: 1.6vmin; font-size: 2.6vmin; font-weight: 800; color: #fff;
+  background: #0a2472cc; border: .4vmin solid #f4b942; border-radius: 999px;
+  padding: .7vmin 4vmin;
+}
+.tagline .bintang-emas { color: var(--emas); }
+.petunjuk-remot { margin-top: 1.2vmin; font-size: 1.9vmin; color: #cfe0ffcc; }
+.petunjuk-remot b { color: #fff; }
+/* Nama sekolah + tombol sudut */
+.sekolah {
+  position: fixed; left: 2.4vmin; bottom: 2vmin; z-index: 300;
+  display: flex; align-items: center; gap: 1.2vmin;
+  font-size: 2.6vmin; font-weight: 800; color: #fff; text-shadow: 0 .3vmin .6vmin #000;
+}
+.sekolah svg { width: 5vmin; height: 6vmin; filter: drop-shadow(0 .3vmin .4vmin #00000088); }
+.tombol-sudut { position: fixed; right: 2.4vmin; bottom: 2vmin; z-index: 300; display: flex; gap: 1.6vmin; }
+.tombol-bulat {
+  width: 11vmin; height: 11vmin; min-width: 64px; min-height: 64px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2a5db0, #0a2472 70%);
+  border: .5vmin solid #7fb2ff; color: #fff; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: 0 0 2vmin #00000088;
+}
+.tombol-bulat .ikon { font-size: 3.6vmin; line-height: 1; }
+.tombol-bulat .label { font-size: 1.3vmin; font-weight: 800; margin-top: .4vmin; }
+.tombol-bulat.aktif { border-color: #4fe35a; box-shadow: 0 0 2.5vmin #4fe35a99; }
 .bintang-latar, .awan-latar { position: fixed; pointer-events: none; z-index: 0; }
 .bintang-latar span { position: fixed; color: #fff8; animation: bintang-kedip 2.4s ease-in-out infinite; }
 .awan-latar span { position: fixed; font-size: 8vmin; opacity: .25; animation: awan-gerak 26s linear infinite; }
-.btn-mulai {
-  font-size: 4.4vmin; font-weight: 900; padding: 2vmin 8vmin; border-radius: 999px;
-  background: linear-gradient(180deg, #ffe29a, #f5a623); color: #5a3200; border: 0; cursor: pointer;
-  box-shadow: 0 8px 0 #a86200, 0 14px 30px rgba(0,0,0,.4);
-}
-.kode-pair {
-  margin-top: 3vmin; background: rgba(0,0,0,.35); border: 2px dashed #ffffff55;
-  border-radius: 14px; padding: 1vmin 3vmin; font-size: 2.4vmin; text-align: center;
-}
-.kode-pair b { display: block; font-size: 5vmin; letter-spacing: 1.5vmin; color: var(--emas); }
-.tombol-suara {
-  position: fixed; bottom: 2vmin; right: 2vmin; z-index: 300;
-  font-size: 2.2vmin; padding: 1.2vmin 2.4vmin; border-radius: 999px;
-  background: #ffffff22; color: #fff; border: 2px solid #ffffff55; cursor: pointer;
-}
 
-/* Setup */
+/* Setup — selaras tema panggung */
 .kartu-setup {
   background: rgba(255,255,255,.08); border: 2px solid #ffffff33; border-radius: 20px;
   padding: 3vmin 4vmin; width: min(120vmin, 94vw); text-align: center; backdrop-filter: blur(4px);

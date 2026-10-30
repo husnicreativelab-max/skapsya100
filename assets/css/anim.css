@@ -26,11 +26,11 @@
   to { transform: translateX(115vw); }
 }
 @keyframes tombol-denyut {
-  0%, 100% { transform: scale(1); box-shadow: 0 8px 0 #a86200, 0 14px 30px rgba(0,0,0,.4); }
-  50% { transform: scale(1.05); box-shadow: 0 8px 0 #a86200, 0 14px 44px rgba(245,166,35,.55); }
+  0%, 100% { transform: scale(1); box-shadow: 0 .8vmin 0 #064d1c, 0 0 3vmin #4fe35a66, inset 0 .8vmin 1vmin #ffffff88; }
+  50% { transform: scale(1.04); box-shadow: 0 .8vmin 0 #064d1c, 0 0 5vmin #4fe35acc, inset 0 .8vmin 1vmin #ffffff88; }
 }
 .anim-denyut { animation: tombol-denyut 1.8s ease-in-out infinite; }
-.anim-denyut:active { animation: none; transform: translateY(6px) scale(.98); box-shadow: 0 2px 0 #a86200; }
+.anim-denyut:active { animation: none; transform: translateY(.6vmin) scale(.98); }
 
 /* Pintu geser (mulai & ganti ronde) */
 @keyframes pintu-kiri-tutup { from { transform: translateX(-100%); } to { transform: translateX(0); } }
@@ -188,6 +188,31 @@
 .bintang-efek {
   position: fixed; z-index: 190; font-size: 3vmin; pointer-events: none;
   animation: bintang-terbang .9s ease-out forwards;
+}
+
+/* ---------- Panggung game-show (beranda) ---------- */
+@keyframes sorot-goyang {
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+}
+@keyframes semburan-putar {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes kilau-kedip {
+  0%, 100% { opacity: .25; transform: scale(.7) rotate(0); }
+  50% { opacity: 1; transform: scale(1.2) rotate(20deg); }
+}
+@keyframes bintang-ceria {
+  0%, 100% { transform: scale(1) rotate(0); }
+  50% { transform: scale(1.15) rotate(10deg); }
+}
+@keyframes sapu-tombol {
+  0% { left: -30%; }
+  55%, 100% { left: 130%; }
+}
+@keyframes konfeti-jatuh {
+  from { transform: translateY(-5vh) rotate(0); }
+  to { transform: translateY(112vh) rotate(720deg); }
 }
 
 /* Kursor ketik (typewriter) */
