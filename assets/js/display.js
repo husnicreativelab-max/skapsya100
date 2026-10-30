@@ -86,6 +86,11 @@
       }
       if (j.waktu_server) offsetWaktu = j.waktu_server - Math.floor(Date.now() / 1000);
       state = j.state;
+      // Sinkron sunyi HANYA di poll pertama (agar event lama tak diputar ulang).
+      if (pollPertama) {
+        pollPertama = false;
+        lastSeq = (state.event && state.event.seq) || 0;
+      }
       terapkanSuara();
       render();
       tanganiEvent();
@@ -153,8 +158,12 @@
       if (faseTampil !== 'setup') { tampil('setup'); faseTampil = 'setup'; }
       renderSetup();
     } else if (fase === 'kuis') {
-      // Dari setup → kuis jangan langsung pindah; tunggu event ronde_baru (pintu geser).
-      if (faseTampil === 'setup') return;
+      // Dari setup → kuis: tunggu event ronde_baru (pintu geser), KECUALI
+      // eventnya sudah lewat/termakan — langsung pindah agar tak macet.
+      if (faseTampil === 'setup') {
+        var seqKuis = state.event ? state.event.seq : 0;
+        if (seqKuis > lastSeq) return; // event baru, biar tanganiEvent() yang main
+      }
       if (faseTampil !== 'kuis') { tampil('kuis'); faseTampil = 'kuis'; soalAktif = null; }
       renderKuis();
     } else if (fase === 'selesai') {
@@ -417,15 +426,10 @@
   }
 
   /* ---------- Event (tepat satu kali) ---------- */
-  var pollPertama = true;
+  var pollPertama = true; // dihabiskan di poll() pertama
   function tanganiEvent() {
     if (!state || !state.event) return;
     var ev = state.event;
-    if (pollPertama) { // sinkron sunyi: jangan putar ulang event lama
-      pollPertama = false;
-      lastSeq = ev.seq;
-      return;
-    }
     if (ev.seq <= lastSeq) return;
     lastSeq = ev.seq;
     var tipe = ev.tipe, data = ev.data || {};
