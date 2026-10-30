@@ -1,0 +1,193 @@
+/* =====================================================
+   Skapsya100 — semua animasi (CSS @keyframes murni)
+   ===================================================== */
+
+/* ---------- Beranda ---------- */
+@keyframes logo-pantul {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(-3vmin) scale(.98, 1.04); }
+  50% { transform: translateY(0) scale(1.05, .94); }
+  65% { transform: translateY(-1vmin) scale(.99, 1.02); }
+}
+.anim-logo { animation: logo-pantul 2.6s ease-in-out infinite; transform-origin: bottom center; }
+
+@keyframes sapu-kilau {
+  from { left: -40%; }
+  to { left: 130%; }
+}
+.anim-sapu-otomatis::after { animation: sapu-kilau 3.2s ease-in-out infinite; }
+
+@keyframes bintang-kedip {
+  0%, 100% { opacity: .15; transform: scale(.8); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+@keyframes awan-gerak {
+  from { transform: translateX(-15vw); }
+  to { transform: translateX(115vw); }
+}
+@keyframes tombol-denyut {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 0 #a86200, 0 14px 30px rgba(0,0,0,.4); }
+  50% { transform: scale(1.05); box-shadow: 0 8px 0 #a86200, 0 14px 44px rgba(245,166,35,.55); }
+}
+.anim-denyut { animation: tombol-denyut 1.8s ease-in-out infinite; }
+.anim-denyut:active { animation: none; transform: translateY(6px) scale(.98); box-shadow: 0 2px 0 #a86200; }
+
+/* Pintu geser (mulai & ganti ronde) */
+@keyframes pintu-kiri-tutup { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes pintu-kanan-tutup { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes pintu-kiri-buka { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@keyframes pintu-kanan-buka { from { transform: translateX(0); } to { transform: translateX(100%); } }
+.pintu.tutup-kiri { display: block; animation: pintu-kiri-tutup .45s ease forwards; }
+.pintu.tutup-kanan { display: block; animation: pintu-kanan-tutup .45s ease forwards; }
+.pintu.buka-kiri { display: block; animation: pintu-kiri-buka .45s ease forwards; }
+.pintu.buka-kanan { display: block; animation: pintu-kanan-buka .45s ease forwards; }
+
+/* ---------- Setup ---------- */
+@keyframes kartu-mantul {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25) rotate(-4deg); }
+  70% { transform: scale(.94); }
+  100% { transform: scale(1.08); }
+}
+.kartu-angka.pilih { animation: kartu-mantul .45s ease forwards; }
+
+@keyframes pop-masuk {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.anim-pop { animation: pop-masuk .4s ease backwards; }
+
+@keyframes papan-jatuh {
+  0% { transform: translateY(-30vmin); opacity: 0; }
+  55% { transform: translateY(0); opacity: 1; }
+  70% { transform: translateY(-2.4vmin); }
+  85% { transform: translateY(0); }
+  93% { transform: translateY(-1vmin); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.anim-jatuh { animation: papan-jatuh .8s ease backwards; }
+
+@keyframes kartu-melayang {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.2vmin); }
+}
+.kartu-kategori { animation: kartu-melayang 3.4s ease-in-out infinite; }
+.kartu-kategori:nth-child(2) { animation-delay: -.8s; }
+.kartu-kategori:nth-child(3) { animation-delay: -1.6s; }
+.kartu-kategori:nth-child(4) { animation-delay: -2.4s; }
+@keyframes kartu-goyang {
+  0%, 100% { transform: scale(1.1) rotate(0); }
+  25% { transform: scale(1.12) rotate(-3deg); }
+  75% { transform: scale(1.12) rotate(3deg); }
+}
+.kartu-kategori:hover { animation: kartu-goyang .5s ease-in-out infinite; border-color: var(--emas); z-index: 2; }
+@keyframes kartu-meledak {
+  0% { transform: scale(1); opacity: 1; }
+  40% { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.kartu-kategori.meledak { animation: kartu-meledak .5s ease forwards; }
+
+/* ---------- Kuis ---------- */
+@keyframes papan-turun {
+  from { transform: translateY(-6vmin); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.anim-turun { animation: papan-turun .5s ease backwards; }
+
+@keyframes label-ronde-masuk {
+  0% { transform: scale(3); opacity: 0; }
+  60% { transform: scale(.95); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.anim-ronde { animation: label-ronde-masuk .7s ease backwards; }
+
+/* Flip 3D kartu jawaban */
+.kartu-jawab { transition: transform .6s cubic-bezier(.35, 1.4, .5, 1); transform: rotateX(0); }
+.slot-jawab.terbuka .kartu-jawab { transform: rotateX(180deg); }
+
+@keyframes denyut-bank {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+.anim-bank { animation: denyut-bank .5s ease 2; }
+
+@keyframes goyang-layar {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-1vmin, .6vmin); }
+  40% { transform: translate(1vmin, -.6vmin); }
+  60% { transform: translate(-.7vmin, -.4vmin); }
+  80% { transform: translate(.7vmin, .4vmin); }
+}
+.anim-goyang { animation: goyang-layar .45s ease 2; }
+
+@keyframes x-masuk {
+  0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+  55% { transform: scale(1.15) rotate(3deg); opacity: 1; }
+  75% { transform: scale(.96); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.anim-x-masuk { animation: x-masuk .45s ease backwards; }
+@keyframes x-keluar {
+  to { transform: scale(.12) translate(38vw, -38vh); opacity: 0; }
+}
+.anim-x-keluar { animation: x-keluar .5s ease-in forwards; }
+
+@keyframes kedip {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .25; }
+}
+.anim-kedip { animation: kedip .7s linear infinite; }
+
+@keyframes redup { from { opacity: 1; } to { opacity: .35; } }
+.anim-redup { animation: redup .4s ease forwards; }
+
+@keyframes panah-geser {
+  0% { transform: translateX(-50%) translateY(-2vmin); opacity: 0; }
+  100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+.kotak-tim.main .panah { animation: panah-geser .4s ease; }
+
+/* Pemenang */
+@keyframes juara-naik {
+  from { transform: translateY(30vmin); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.anim-juara { animation: juara-naik .9s cubic-bezier(.2, 1.3, .4, 1) backwards; }
+@keyframes lesu {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+.anim-lesu { animation: lesu 2.2s ease-in-out infinite; transform-origin: bottom center; }
+
+/* Timer */
+@keyframes timer-bahaya {
+  0%, 100% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.12) rotate(-4deg); }
+  75% { transform: scale(1.12) rotate(4deg); }
+}
+.timer-bahaya { animation: timer-bahaya .5s linear infinite; }
+.timer-bahaya b { color: #ff6b6b !important; }
+
+/* Partikel bintang jawaban benar (elemen .bintang-efek) */
+@keyframes bintang-terbang {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; }
+}
+.bintang-efek {
+  position: fixed; z-index: 190; font-size: 3vmin; pointer-events: none;
+  animation: bintang-terbang .9s ease-out forwards;
+}
+
+/* Kursor ketik (typewriter) */
+.kursor-ketik::after { content: "▌"; animation: kedip .5s linear infinite; color: var(--emas); }
+
+/* ---------- Hormati prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -1,0 +1,2 @@
+# Blokir akses langsung ke file PHP internal (config/db).
+Require all denied
