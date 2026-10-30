@@ -304,7 +304,7 @@ body.di-beranda .konfeti-latar { display: block; }
 /* Beranda gambar splash + area sentuh transparan */
 #layar-beranda.splash-gambar.tampil {
   display: block; position: fixed; inset: 0; width: auto; height: auto;
-  background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
   background-color: #0b1e3a;
 }
 .hotspot { position: absolute; background: transparent; border: 0; cursor: pointer; padding: 0; }
@@ -313,7 +313,7 @@ body.di-beranda .konfeti-latar { display: block; }
 .hotspot.layar { left: 88.5%; top: 83%; width: 7.5%; height: 13%; }
 .hotspot:focus-visible { outline: .5vmin solid #fff; }
 .hotspot-kode {
-  position: absolute; left: 49%; top: 74.5%; width: 19.5%; height: 10%;
+  position: absolute; left: 48.8%; top: 74.5%; width: 21%; height: 10%;
   display: flex; justify-content: space-between; align-items: stretch; pointer-events: none;
 }
 .hotspot-kode span {
