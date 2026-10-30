@@ -9,7 +9,7 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skapsya100 — Layar Kuis</title>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css?v=20261031b">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css?v=20261031c">
 <link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/anim.css?v=20261031b">
 </head>
 <body class="display" data-base="<?= BASE_PATH ?>">
@@ -82,6 +82,7 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 
   <!-- ===== KUIS ===== -->
   <section class="layar" id="layar-kuis">
+    <img class="logo-kuis" src="<?= BASE_PATH ?>/assets/img/logo.png?v=20261031b" alt="Skapsya 100">
     <div class="bilah-atas" id="bilah-tim"></div>
     <div><span class="label-ronde" id="label-ronde">RONDE 1</span></div>
     <div class="papan-pertanyaan" id="papan-pertanyaan">
