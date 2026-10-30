@@ -9,8 +9,8 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skapsya100 — Layar Kuis</title>
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css?v=20261031a">
-<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/anim.css?v=20261031a">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css?v=20261031b">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/anim.css?v=20261031b">
 </head>
 <body class="display" data-base="<?= BASE_PATH ?>">
 <canvas id="kanvas-konfeti"></canvas>
@@ -35,20 +35,7 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 <main class="panggung">
   <!-- ===== BERANDA ===== -->
   <section class="layar tampil" id="layar-beranda">
-    <div class="logo-panggung">
-      <div class="semburan"></div>
-      <div class="lencana anim-logo">
-        <div class="logo-skapsya">SKAPSYA</div>
-        <div class="logo-100">100</div>
-      </div>
-      <span class="kilau-bintang k1">✦</span>
-      <span class="kilau-bintang k2">✦</span>
-      <span class="kilau-bintang k3">✦</span>
-      <span class="kilau-bintang k4">✦</span>
-      <span class="bintang-logo b1">★</span>
-      <span class="bintang-logo b2">★</span>
-      <span class="bintang-logo b3">★</span>
-    </div>
+    <img class="logo-gambar anim-logo" src="<?= BASE_PATH ?>/assets/img/logo.png?v=20261031b" alt="Skapsya 100">
     <button class="btn-mulai anim-denyut" id="btn-mulai"><span class="segitiga">▶</span> MULAI</button>
     <div class="kode-remot">
       <span class="ikon-remot">
