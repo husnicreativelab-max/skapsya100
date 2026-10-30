@@ -10,10 +10,10 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Skapsya100 — Layar Kuis</title>
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/anim.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/anim.css">
 </head>
-<body class="display" data-base="<?= BASE_URL ?>">
+<body class="display" data-base="<?= BASE_PATH ?>">
 <canvas id="kanvas-konfeti"></canvas>
 <div class="bintang-latar" id="bintang-latar"></div>
 <div class="awan-latar" id="awan-latar"></div>
@@ -104,8 +104,8 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 <div id="pesan-display" class="pesan galat" style="display:none;position:fixed;bottom:8vmin;left:50%;transform:translateX(-50%);z-index:400"></div>
 <button class="tombol-suara" id="btn-suara">🔈 Aktifkan Suara</button>
 
-<script src="<?= BASE_URL ?>/assets/js/sfx.js"></script>
-<script src="<?= BASE_URL ?>/assets/js/confetti.js"></script>
-<script src="<?= BASE_URL ?>/assets/js/display.js"></script>
+<script src="<?= BASE_PATH ?>/assets/js/sfx.js"></script>
+<script src="<?= BASE_PATH ?>/assets/js/confetti.js"></script>
+<script src="<?= BASE_PATH ?>/assets/js/display.js"></script>
 </body>
 </html>

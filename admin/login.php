@@ -5,7 +5,7 @@ require_once __DIR__ . '/../includes/csrf.php';
 
 mulai_sesi();
 if (sudah_login()) {
-  header('Location: ' . BASE_URL . '/admin/index.php');
+  header('Location: ' . BASE_PATH . '/admin/index.php');
   exit;
 }
 
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($lanjut !== '' && str_starts_with($lanjut, '/')) {
       header('Location: ' . $lanjut);
     } else {
-      header('Location: ' . BASE_URL . '/admin/index.php');
+      header('Location: ' . BASE_PATH . '/admin/index.php');
     }
     exit;
   } else {
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Masuk — Admin Skapsya100</title>
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css">
 </head>
 <body class="admin login-latar">
 <main class="kotak-login">
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </label>
     <button class="btn btn-primer btn-besar" type="submit">Masuk</button>
   </form>
-  <p class="kembali"><a href="<?= BASE_URL ?>/display/">← Kembali ke layar display</a></p>
+  <p class="kembali"><a href="<?= BASE_PATH ?>/display/">← Kembali ke layar display</a></p>
 </main>
 </body>
 </html>

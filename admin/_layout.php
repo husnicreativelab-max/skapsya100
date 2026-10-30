@@ -17,7 +17,7 @@ function layout_awal(string $judul, string $tab = ''): void {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($judul) ?> — Admin Skapsya100</title>
-<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/assets/css/style.css">
 </head>
 <body class="admin">
 <header class="topbar">

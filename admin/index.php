@@ -34,8 +34,8 @@ tampil_pesan();
 </div>
 
 <div class="grid-tombol">
-  <a class="btn btn-primer btn-besar" href="<?= BASE_URL ?>/remote/">📱 Buka Remote</a>
-  <a class="btn btn-besar" href="<?= BASE_URL ?>/display/" target="_blank">🖥️ Buka Display</a>
+  <a class="btn btn-primer btn-besar" href="<?= BASE_PATH ?>/remote/">📱 Buka Remote</a>
+  <a class="btn btn-besar" href="<?= BASE_PATH ?>/display/" target="_blank">🖥️ Buka Display</a>
   <a class="btn btn-besar" href="kategori.php">🗂️ Kelola Kategori</a>
   <a class="btn btn-besar" href="soal.php">❓ Kelola Soal</a>
 </div>

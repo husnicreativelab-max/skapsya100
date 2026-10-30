@@ -23,7 +23,7 @@ function admin_id(): ?int {
 // Wajibkan login, kalau belum lempar ke halaman login admin.
 function wajib_login(): void {
   if (!sudah_login()) {
-    header('Location: ' . BASE_URL . '/admin/login.php');
+    header('Location: ' . BASE_PATH . '/admin/login.php');
     exit;
   }
 }

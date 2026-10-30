@@ -15,6 +15,9 @@ $__jalan = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/'))
 // Naik ke akar aplikasi jika script ada di subfolder (api/admin/display/remote)
 $__jalan = preg_replace('#/(api|admin|display|remote)$#', '', $__jalan);
 define('BASE_URL', $__skema . '://' . $__host . $__jalan);
+// Jalur saja tanpa skema+host ('' di root, '/kuis' di subfolder).
+// Dipakai semua aset/link/redirect agar kebal mixed-content & proxy.
+define('BASE_PATH', $__jalan === '' ? '' : $__jalan);
 
 // --- Nama aplikasi ---
 define('APP_NAMA', 'Skapsya100');
