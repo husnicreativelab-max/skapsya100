@@ -67,10 +67,11 @@ if ($aksi === 'buka_jawaban') {
     ]);
     $jawab_ok();
   }
-  giliran_berikut($st); // pindah tim + timer otomatis jalan
+  // Benar = giliran TETAP (lanjut menjawab), timer jalan lagi.
+  timer_jalan($st);
   simpan_state($st, $is_top ? 'top' : 'benar', [
     'nomor' => $nomor, 'poin' => $poin, 'tim' => $aktif,
-    'skor' => (int)$st['tim'][$aktif]['skor'], 'giliran' => (int)$st['tim_aktif'],
+    'skor' => (int)$st['tim'][$aktif]['skor'], 'giliran' => $aktif,
   ]);
   $jawab_ok();
 }
