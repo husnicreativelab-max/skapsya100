@@ -33,35 +33,15 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 <div class="pintu kanan" id="pintu-kanan"></div>
 
 <main class="panggung">
-  <!-- ===== BERANDA ===== -->
-  <section class="layar tampil" id="layar-beranda">
-    <div class="logo-panggung">
-      <div class="semburan"></div>
-      <div class="lencana anim-logo">
-        <div class="logo-skapsya">SKAPSYA</div>
-        <div class="logo-100">100</div>
-      </div>
-      <span class="kilau-bintang k1">✦</span>
-      <span class="kilau-bintang k2">✦</span>
-      <span class="kilau-bintang k3">✦</span>
-      <span class="kilau-bintang k4">✦</span>
-      <span class="bintang-logo b1">★</span>
-      <span class="bintang-logo b2">★</span>
-      <span class="bintang-logo b3">★</span>
+  <!-- ===== BERANDA (gambar splash + area sentuh) ===== -->
+  <section class="layar tampil splash-gambar" id="layar-beranda"
+      style="background-image:url('<?= BASE_PATH ?>/assets/img/splash.png')">
+    <button class="hotspot mulai" id="btn-mulai" aria-label="Mulai"></button>
+    <div class="hotspot-kode">
+      <span id="kode-0">·</span><span id="kode-1">·</span><span id="kode-2">·</span><span id="kode-3">·</span>
     </div>
-    <button class="btn-mulai anim-denyut" id="btn-mulai"><span class="segitiga">▶</span> MULAI</button>
-    <div class="kode-remot">
-      <span class="ikon-remot">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="4.5" fill="#fff"/><circle cx="12" cy="7" r="2" fill="#0a2472"/><rect x="10" y="10.6" width="4" height="1.8" rx=".9" fill="#0a2472"/><rect x="10" y="13.8" width="4" height="1.8" rx=".9" fill="#0a2472"/><rect x="10" y="17" width="4" height="1.8" rx=".9" fill="#0a2472"/></svg>
-      </span>
-      <span class="label-remot">KODE<br>REMOT</span>
-      <span class="kotak-kode" id="kode-0">·</span>
-      <span class="kotak-kode" id="kode-1">·</span>
-      <span class="kotak-kode" id="kode-2">·</span>
-      <span class="kotak-kode" id="kode-3">·</span>
-    </div>
-    <div class="tagline"><span class="bintang-emas">★</span> Kuis Survei Seru ala Family 100 <span class="bintang-emas">★</span></div>
-    <div class="petunjuk-remot">Remote guru: buka <b><?= e($_SERVER['HTTP_HOST'] ?? '') ?>/remote</b> lalu masukkan kode di atas</div>
+    <button class="hotspot suara" id="btn-suara" aria-label="Aktifkan suara"></button>
+    <button class="hotspot layar" id="btn-full" aria-label="Layar penuh"></button>
   </section>
 
   <!-- ===== SETUP ===== -->
@@ -136,16 +116,6 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
 <div class="toast-tengah" id="toast"></div>
 
 <div id="pesan-display" class="pesan galat" style="display:none;position:fixed;bottom:8vmin;left:50%;transform:translateX(-50%);z-index:400"></div>
-
-<!-- Nama sekolah + tombol sudut -->
-<div class="sekolah">
-  <svg viewBox="0 0 40 48" aria-hidden="true"><path d="M20 2 L36 8 V22 C36 34 28 42 20 46 C12 42 4 34 4 22 V8 Z" fill="#0a7d2c" stroke="#ffd166" stroke-width="3"/><path d="M20 10 L29 13.4 V22 C29 29 25 34 20 37 C15 34 11 29 11 22 V13.4 Z" fill="none" stroke="#ffffff" stroke-width="1.6" opacity=".8"/><text x="20" y="28" text-anchor="middle" font-size="12" font-weight="900" fill="#ffd166" font-family="Arial, sans-serif">S</text></svg>
-  <span>SMK As-Syafi'iyah</span>
-</div>
-<div class="tombol-sudut">
-  <button class="tombol-bulat" id="btn-suara"><span class="ikon" id="ikon-suara">🔈</span><span class="label">SUARA</span></button>
-  <button class="tombol-bulat" id="btn-full"><span class="ikon">⛶</span><span class="label">LAYAR</span></button>
-</div>
 
 <script src="<?= BASE_PATH ?>/assets/js/sfx.js"></script>
 <script src="<?= BASE_PATH ?>/assets/js/confetti.js"></script>

@@ -691,7 +691,8 @@
       if (ok) {
         SFX.klik();
         SFX.mulaiMusik();
-        $('ikon-suara').textContent = '🔊';
+        var ik = $('ikon-suara');
+        if (ik) ik.textContent = '🔊';
         this.classList.add('aktif');
         // Masuk layar penuh sekali
         var el = document.documentElement;

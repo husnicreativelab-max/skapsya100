@@ -301,6 +301,25 @@ body.di-beranda .konfeti-latar { display: block; }
 .tagline .bintang-emas { color: var(--emas); }
 .petunjuk-remot { margin-top: 1.2vmin; font-size: 1.9vmin; color: #cfe0ffcc; }
 .petunjuk-remot b { color: #fff; }
+/* Beranda gambar splash + area sentuh transparan */
+#layar-beranda.splash-gambar.tampil {
+  display: block; position: fixed; inset: 0; width: auto; height: auto;
+  background-size: 100% 100%; background-position: center; background-repeat: no-repeat;
+  background-color: #0b1e3a;
+}
+.hotspot { position: absolute; background: transparent; border: 0; cursor: pointer; padding: 0; }
+.hotspot.mulai { left: 26%; top: 55.5%; width: 48%; height: 17%; }
+.hotspot.suara { left: 81%; top: 83%; width: 7.5%; height: 13%; }
+.hotspot.layar { left: 88.5%; top: 83%; width: 7.5%; height: 13%; }
+.hotspot:focus-visible { outline: .5vmin solid #fff; }
+.hotspot-kode {
+  position: absolute; left: 49%; top: 74.5%; width: 19.5%; height: 10%;
+  display: flex; justify-content: space-between; align-items: stretch; pointer-events: none;
+}
+.hotspot-kode span {
+  flex: 0 0 21.5%; display: flex; align-items: center; justify-content: center;
+  font-size: 5vmin; font-weight: 900; color: #0a2472; line-height: 1;
+}
 /* Nama sekolah + tombol sudut */
 .sekolah {
   position: fixed; left: 2.4vmin; bottom: 2vmin; z-index: 300;
