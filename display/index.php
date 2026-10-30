@@ -2,7 +2,7 @@
 // Layar proyektor: beranda, setup, papan kuis, podium.
 // - Saat setup: boleh mengirim aksi setup (display_token).
 // - Saat kuis: READ-ONLY (hanya polling + animasi + suara).
-require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php + fungsi e()
 ?>
 <!DOCTYPE html>
 <html lang="id">
