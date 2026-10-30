@@ -1,5 +1,5 @@
 /* =====================================================
-   Skapsya100 — Display proyektor (READ-ONLY saat kuis).
+   Skapsya100 — Display proyektor, kuis BERGILIRAN (READ-ONLY).
    Polling tiap 1 detik, mainkan tiap event TEPAT SATU KALI.
    ===================================================== */
 (function () {
@@ -8,11 +8,13 @@
   var BASE = document.body.getAttribute('data-base') || '';
   var token = localStorage.getItem('skapsya_token') || '';
   var lastSeq = 0;             // event terakhir yang sudah dimainkan
+  var pollPertama = true;      // dihabiskan di poll() pertama
   var state = null;
   var mulaiDitekan = false;    // sudah klik MULAI (lokal)
   var langkahSetup = 0;        // 0 jumlah, 1 nama, 2 kategori
   var daftarKategori = [];
-  var soalAktif = null;        // soal_id yang sedang tampil
+  var soalAktif = null;        // soal_id pertanyaan yang sedang tampil
+  var papanSoalId = null;      // soal_id papan jawaban yang sedang tampil
   var animasiNomor = -1;       // nomor jawaban yang sedang dianimasikan
   var gerakKurangi = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var offsetWaktu = 0;         // selisih jam server - lokal (detik)
@@ -69,6 +71,18 @@
     el.style.display = 'block';
     clearTimeout(el._t);
     el._t = setTimeout(function () { el.style.display = 'none'; }, 2600);
+  }
+
+  // Pesan tengah singkat (papan habis, dll).
+  function toast(t, ms) {
+    var el = $('toast');
+    if (!el) return;
+    el.textContent = t;
+    el.classList.remove('tampil');
+    void el.offsetWidth;
+    el.classList.add('tampil');
+    clearTimeout(el._t);
+    el._t = setTimeout(function () { el.classList.remove('tampil'); }, ms || 2200);
   }
 
   /* ---------- Polling ---------- */
@@ -131,7 +145,7 @@
       if (el) el.classList.toggle('tampil', l === nama);
     });
     // Reset tanda render agar layar baru selalu digambar penuh.
-    sigSetup = ''; sigKategori = ''; sigBilah = ''; sigX = ''; sigSelesai = '';
+    sigSetup = ''; sigKategori = ''; sigBilah = ''; sigSelesai = '';
   }
 
   function pintu(cb) {
@@ -164,7 +178,7 @@
         var seqKuis = state.event ? state.event.seq : 0;
         if (seqKuis > lastSeq) return; // event baru, biar tanganiEvent() yang main
       }
-      if (faseTampil !== 'kuis') { tampil('kuis'); faseTampil = 'kuis'; soalAktif = null; }
+      if (faseTampil !== 'kuis') { tampil('kuis'); faseTampil = 'kuis'; soalAktif = null; papanSoalId = null; }
       renderKuis();
     } else if (fase === 'selesai') {
       if (faseTampil !== 'selesai') { tampil('selesai'); faseTampil = 'selesai'; }
@@ -254,7 +268,7 @@
       d.innerHTML = '<div class="ikon">' + k.ikon + '</div><div class="nama">' +
         escapeHtml(k.nama) + '</div><div class="jml">' + k.jumlah_soal + ' soal</div>';
       d.onmouseenter = function () { if (SFX.siap()) SFX.hover(); };
-      d.onclick = function (ev) {
+      d.onclick = function () {
         SFX.popBurst();
         aksiSetup('pilih_kategori', { kategori_id: k.id });
       };
@@ -297,34 +311,32 @@
   }
 
   /* ---------- Kuis ---------- */
-  var sigBilah = '', sigX = '';
+  var sigBilah = '';
   function renderKuis() {
-    // Tim + bank (bangun ulang hanya jika berubah, agar count-up tidak terpotong)
+    // Bilah tim (sorot giliran berjalan). Bangun ulang hanya jika berubah.
     var bilah = $('bilah-tim');
-    var sb = JSON.stringify([state.tim, state.bank, state.pengali, state.tim_main]);
+    var sb = JSON.stringify([state.tim, state.tim_aktif, state.pengali]);
     if (sb !== sigBilah) {
       sigBilah = sb;
       bilah.innerHTML = '';
-    (state.tim || []).forEach(function (t, i) {
-      var d = document.createElement('div');
-      d.className = 'kotak-tim' + (i === state.tim_main ? ' main' : '');
-      d.id = 'kotak-tim-' + i;
-      d.style.borderTopColor = t.warna;
-      d.innerHTML = '<div class="panah">🔻</div><div class="nama">' + escapeHtml(t.nama) +
-        '</div><div class="skor" id="skor-tim-' + i + '">' + t.skor + '</div>';
-      bilah.appendChild(d);
-    });
-      var bank = document.createElement('div');
-      bank.className = 'kotak-bank';
-      bank.id = 'kotak-bank';
-      bank.innerHTML = '<div class="label">BANK ×' + state.pengali + '</div><div class="nilai" id="nilai-bank">' +
-        state.bank + '</div>';
-      bilah.appendChild(bank);
+      (state.tim || []).forEach(function (t, i) {
+        var d = document.createElement('div');
+        d.className = 'kotak-tim' + (i === state.tim_aktif ? ' main' : '');
+        d.id = 'kotak-tim-' + i;
+        d.style.borderTopColor = t.warna;
+        d.innerHTML = '<div class="panah">🔻</div>' +
+          (i === state.tim_aktif ? '<div class="tag-giliran">🎯 GILIRAN</div>' : '<div class="tag-giliran semu">&nbsp;</div>') +
+          '<div class="nama">' + escapeHtml(t.nama) + '</div>' +
+          '<div class="skor" id="skor-tim-' + i + '">' + t.skor + '</div>';
+        bilah.appendChild(d);
+      });
     }
 
-    // Label ronde
+    // Label ronde + pengali
     var lr = $('label-ronde');
-    lr.textContent = 'RONDE ' + state.ronde;
+    lr.textContent = state.pengali > 1
+      ? 'RONDE ' + state.ronde + '  ×' + state.pengali
+      : 'RONDE ' + state.ronde;
 
     // Pertanyaan (typewriter jika soal baru)
     var pq = $('teks-pertanyaan');
@@ -340,10 +352,12 @@
       pq.setAttribute('data-penuh', state.pertanyaan || '');
     }
 
-    // Papan jawaban
+    // Papan jawaban: BANGUN ULANG PENUH tiap ganti soal (anti-jawaban lama menempel),
+    // atau jika jumlah slot berubah.
     var papan = $('papan-jawaban');
-    // Bangun ulang hanya jika jumlah slot berubah
-    if (papan.childElementCount !== (state.jawaban || []).length) {
+    if (papanSoalId !== state.soal_id || papan.childElementCount !== (state.jawaban || []).length) {
+      papanSoalId = state.soal_id;
+      animasiNomor = -1;
       papan.innerHTML = '';
       (state.jawaban || []).forEach(function (jb, i) {
         papan.appendChild(buatSlot(i, jb));
@@ -355,19 +369,6 @@
       if (!slot) return;
       if (jb.terbuka && i !== animasiNomor) bukaSlotStatis(slot, jb);
     });
-
-    // Indikator X (bangun ulang hanya jika berubah)
-    if (sigX !== 'x' + state.x + 's' + (state.steal ? state.steal.mode : '')) {
-      sigX = 'x' + state.x + 's' + (state.steal ? state.steal.mode : '');
-      var xi = $('indikator-x');
-      xi.innerHTML = '';
-      for (var k = 0; k < 3; k++) {
-        var x = document.createElement('div');
-        x.className = 'x-kecil' + (k < state.x ? ' nyala' : '');
-        x.textContent = '✕';
-        xi.appendChild(x);
-      }
-    }
   }
 
   function buatSlot(i, jb) {
@@ -409,16 +410,14 @@
     }, 28);
   }
 
-  // Count-up angka.
-  function countUp(el, dari, ke, detik, tiapLangkah) {
+  // Count-up / count-down angka.
+  function countUp(el, dari, ke, detik) {
     if (gerakKurangi || dari === ke) { el.textContent = ke; return; }
     var awal = performance.now();
     var dur = (detik || 0.8) * 1000;
     function fr(t) {
       var p = Math.min(1, (t - awal) / dur);
-      var v = Math.round(dari + (ke - dari) * p);
-      el.textContent = v;
-      if (tiapLangkah && p < 1 && v !== dari) tiapLangkah();
+      el.textContent = Math.round(dari + (ke - dari) * p);
       if (p < 1) requestAnimationFrame(fr);
       else el.textContent = ke;
     }
@@ -426,7 +425,6 @@
   }
 
   /* ---------- Event (tepat satu kali) ---------- */
-  var pollPertama = true; // dihabiskan di poll() pertama
   function tanganiEvent() {
     if (!state || !state.event) return;
     var ev = state.event;
@@ -436,12 +434,8 @@
     if (tipe === 'ronde_baru') evRondeBaru(data);
     else if (tipe === 'benar') evBenar(data, false);
     else if (tipe === 'top') evBenar(data, true);
-    else if (tipe === 'bank_masuk') evBankMasuk(data);
     else if (tipe === 'x') evX(data);
-    else if (tipe === 'x3') evX3(data);
-    else if (tipe === 'steal') evSteal(data);
-    else if (tipe === 'steal_berhasil') evStealHasil(data, true);
-    else if (tipe === 'steal_gagal') evStealHasil(data, false);
+    else if (tipe === 'giliran') evGiliran(data);
     else if (tipe === 'menang') evMenang(data);
     else if (tipe === 'ke_setup') { langkahSetup = 0; tampil('setup'); faseTampil = 'setup'; renderSetup(); }
   }
@@ -449,11 +443,12 @@
   function evRondeBaru(data) {
     SFX.rondeJingle();
     if (gerakKurangi) {
-      tampil('kuis'); faseTampil = 'kuis'; soalAktif = null; renderKuis(); return;
+      tampil('kuis'); faseTampil = 'kuis'; soalAktif = null; papanSoalId = null; renderKuis(); return;
     }
     pintu(function () {
       tampil('kuis'); faseTampil = 'kuis';
       soalAktif = null;
+      papanSoalId = null;
       renderKuis();
       var lr = $('label-ronde');
       lr.classList.remove('anim-ronde');
@@ -463,6 +458,7 @@
     });
   }
 
+  // Jawaban benar: flip 3D → kilau → typewriter → poin count-up → skor tim naik.
   function evBenar(data, isTop) {
     var nomor = data.nomor;
     animasiNomor = nomor;
@@ -472,36 +468,48 @@
     // Flip 3D
     setTimeout(function () { if (slot) slot.classList.add('terbuka'); }, gerakKurangi ? 0 : 150);
     setTimeout(function () {
-      if (!slot) { animasiNomor = -1; return; }
-      var belakang = slot.querySelector('.belakang');
-      var teksEl = belakang.querySelector('.teks');
-      var poinEl = belakang.querySelector('.poin');
-      // Kilau menyapu kartu
-      belakang.classList.remove('sapu');
-      void belakang.offsetWidth;
-      belakang.classList.add('sapu');
-      // Teks huruf per huruf + poin count-up
-      ketik(teksEl, jb.teks || '', null);
-      countUp(poinEl, 0, jb.poin || 0, 0.7, null);
-      // Bank berdenyut + hitung naik
-      var bankEl = $('nilai-bank');
-      if (bankEl) {
-        var bankBox = $('kotak-bank');
-        bankBox.classList.remove('anim-bank');
-        void bankBox.offsetWidth;
-        bankBox.classList.add('anim-bank');
-        countUp(bankEl, Math.max(0, state.bank - (data.poin || 0)), state.bank, 0.7, null);
+      if (slot) {
+        var belakang = slot.querySelector('.belakang');
+        var teksEl = belakang.querySelector('.teks');
+        var poinEl = belakang.querySelector('.poin');
+        // Kilau menyapu kartu
+        belakang.classList.remove('sapu');
+        void belakang.offsetWidth;
+        belakang.classList.add('sapu');
+        // Teks huruf per huruf + poin count-up
+        ketik(teksEl, jb.teks || '', null);
+        countUp(poinEl, 0, jb.poin || 0, 0.7);
+        // Partikel bintang dari kartu
+        bintangDari(slot);
       }
-      // Partikel bintang dari kartu
-      bintangDari(slot);
+      // Skor tim yang menjawab menghitung NAIK (+poin langsung, tanpa bank)
+      var sk = $('skor-tim-' + data.tim);
+      if (sk) {
+        countUp(sk, Math.max(0, (data.skor || 0) - (data.poin || 0)), data.skor || 0, 0.8);
+        var box = $('kotak-tim-' + data.tim);
+        if (box) {
+          box.classList.remove('anim-bank');
+          void box.offsetWidth;
+          box.classList.add('anim-bank');
+        }
+        for (var k = 0; k < 3; k++) setTimeout(function () { if (SFX.siap()) SFX.koin(); }, k * 150);
+      }
       if (isTop && !gerakKurangi) {
         // Jawaban #1: emas, goyang layar, konfeti kecil
         document.querySelector('.panggung').classList.add('anim-goyang');
         setTimeout(function () { document.querySelector('.panggung').classList.remove('anim-goyang'); }, 950);
-        var r = slot.getBoundingClientRect();
-        Konfeti.kecil(r.left + r.width / 2, r.top + r.height / 2);
+        if (slot) {
+          var r = slot.getBoundingClientRect();
+          Konfeti.kecil(r.left + r.width / 2, r.top + r.height / 2);
+        }
       }
       animasiNomor = -1;
+      renderKuis();
+      // Papan habis → beri tahu penonton ronde usai
+      if (data.ronde_selesai) {
+        toast('✅ Papan habis! Menunggu soal berikutnya…');
+        if (!gerakKurangi) Konfeti.hujan(2);
+      }
     }, gerakKurangi ? 0 : 600);
     renderKuis();
   }
@@ -523,73 +531,11 @@
     }
   }
 
-  function evBankMasuk(data) {
-    // Semua jawaban terbuka: animasikan kartu terakhir lalu terbangkan bank.
-    var nomor = data.nomor;
-    if (typeof nomor === 'number') {
-      var slot = $('slot-' + nomor);
-      if (slot) {
-        animasiNomor = nomor;
-        var jb = (state.jawaban || [])[nomor] || {};
-        if (data.top) SFX.tingTop(); else SFX.tingBenar();
-        setTimeout(function () { slot.classList.add('terbuka'); }, 150);
-        setTimeout(function () {
-          var belakang = slot.querySelector('.belakang');
-          belakang.classList.add('sapu');
-          ketik(belakang.querySelector('.teks'), jb.teks || '', null);
-          countUp(belakang.querySelector('.poin'), 0, jb.poin || 0, 0.6, null);
-          animasiNomor = -1;
-          renderKuis();
-          terbangBank(data.tim, data.bank);
-        }, 650);
-        return;
-      }
-    }
-    terbangBank(data.tim, data.bank);
-  }
-
-  function terbangBank(timIdx, bank) {
-    renderKuis();
-    var dari = $('kotak-bank');
-    var ke = $('kotak-tim-' + timIdx);
-    if (!dari || !ke || gerakKurangi) {
-      var sk = $('skor-tim-' + timIdx);
-      if (sk) sk.textContent = state.tim[timIdx].skor;
-      var nb = $('nilai-bank');
-      if (nb) nb.textContent = state.bank;
-      return;
-    }
-    var r1 = dari.getBoundingClientRect();
-    var r2 = ke.querySelector('.skor').getBoundingClientRect();
-    // Koin/angka terbang + bunyi koin berderet
-    for (var i = 0; i < 6; i++) {
-      (function (k) {
-        setTimeout(function () {
-          var koin = document.createElement('div');
-          koin.className = 'koin-terbang';
-          koin.textContent = '🪙+' + Math.round(bank / 6);
-          koin.style.left = (r1.left + r1.width / 2) + 'px';
-          koin.style.top = (r1.top + r1.height / 2) + 'px';
-          document.body.appendChild(koin);
-          SFX.koin();
-          koin.animate([
-            { transform: 'translate(0,0) scale(1)', opacity: 1 },
-            { transform: 'translate(' + (r2.left + r2.width / 2 - r1.left - r1.width / 2) + 'px,' +
-              (r2.top - r1.top) + 'px) scale(.6)', opacity: .9 }
-          ], { duration: 700, easing: 'ease-in' }).onfinish = function () { koin.remove(); };
-        }, k * 130);
-      })(i);
-    }
-    setTimeout(function () {
-      var sk = $('skor-tim-' + timIdx);
-      if (sk) countUp(sk, Math.max(0, state.tim[timIdx].skor - bank), state.tim[timIdx].skor, 0.9, function () {});
-      var nb = $('nilai-bank');
-      if (nb) nb.textContent = state.bank;
-    }, 900);
-  }
-
+  // Jawaban salah: X raksasa + skor tim menghitung TURUN + giliran pindah.
   function evX(data) {
     SFX.buzzerX();
+    var nama = (state.tim[data.tim] && state.tim[data.tim].nama) || '';
+    $('x-sub').textContent = nama + '  −' + (data.denda || 0);
     var ov = $('overlay-x');
     var pg = document.querySelector('.panggung');
     if (!gerakKurangi) pg.classList.add('anim-goyang');
@@ -598,6 +544,11 @@
     xr.classList.remove('anim-x-masuk', 'anim-x-keluar');
     void xr.offsetWidth;
     xr.classList.add('anim-x-masuk');
+    // Skor tim berdenyut turun
+    setTimeout(function () {
+      var sk = $('skor-tim-' + data.tim);
+      if (sk) countUp(sk, (data.skor || 0) + (data.denda || 0), data.skor || 0, 0.7);
+    }, gerakKurangi ? 0 : 400);
     setTimeout(function () {
       xr.classList.remove('anim-x-masuk');
       xr.classList.add('anim-x-keluar');
@@ -605,42 +556,21 @@
     setTimeout(function () {
       ov.classList.remove('tampil', 'kilat-merah');
       pg.classList.remove('anim-goyang');
-      renderKuis();
+      renderKuis(); // panah giliran bergeser ke tim berikut
     }, gerakKurangi ? 100 : 1650);
     renderKuis();
   }
 
-  function evX3(data) {
-    SFX.buzzer3X();
-    var ov = $('overlay-x3');
-    var pg = document.querySelector('.panggung');
-    pg.classList.add('anim-redup');
-    ov.classList.add('tampil');
-    setTimeout(function () {
-      ov.classList.remove('tampil');
-      pg.classList.remove('anim-redup');
-      renderKuis(); // panah tim bergeser (tim_main tetap, steal oleh lawan)
-    }, gerakKurangi ? 100 : 2200);
+  // Giliran dilewati: kedipkan kotak tim yang kini giliran.
+  function evGiliran(data) {
+    if (SFX.siap()) SFX.hover();
     renderKuis();
-  }
-
-  function evSteal(data) {
-    SFX.steal();
-    var ov = $('overlay-steal');
-    ov.classList.add('tampil', 'gelap');
-    // Sorot tim lawan: tandai sementara
-    var timEl = $('kotak-tim-' + data.oleh);
-    if (timEl) timEl.classList.add('main');
-    setTimeout(function () {
-      ov.classList.remove('tampil', 'gelap');
-      renderKuis();
-    }, gerakKurangi ? 100 : 2600);
-  }
-
-  function evStealHasil(data, berhasil) {
-    if (berhasil) { SFX.tingTop(); Konfeti.hujan(2); }
-    else SFX.buzzerX();
-    terbangBank(data.tim, data.bank);
+    var box = $('kotak-tim-' + data.tim);
+    if (box && !gerakKurangi) {
+      box.classList.remove('anim-giliran');
+      void box.offsetWidth;
+      box.classList.add('anim-giliran');
+    }
   }
 
   function evMenang(data) {
@@ -680,8 +610,9 @@
     $('judul-menang').textContent = '🏆 ' + menang + ' MENANG! 🏆';
   }
 
-  /* ---------- Timer ---------- */
+  /* ---------- Timer otomatis ---------- */
   var detikBunyi = -1;
+  var kunciHabis = '';
   setInterval(function () {
     if (!state || state.fase !== 'kuis') return;
     var box = $('timer-box');
@@ -691,7 +622,11 @@
       var kini = Math.floor(Date.now() / 1000) + offsetWaktu;
       sisa = Math.max(0, tm.deadline - kini);
     }
-    if (!tm.berjalan && sisa <= 0) { box.classList.remove('tampil'); detikBunyi = -1; return; }
+    if (!tm.berjalan && sisa <= 0) {
+      // Timer berhenti (ronde selesai / menunggu): sembunyikan lingkaran.
+      box.classList.remove('tampil');
+      return;
+    }
     box.classList.add('tampil');
     var total = state.pengaturan.timer_detik || 30;
     var p = Math.max(0, sisa / total);
@@ -704,6 +639,18 @@
     if (bahaya && sisa !== detikBunyi && SFX.siap()) {
       detikBunyi = sisa;
       SFX.tikTimer(true);
+    }
+    // Waktu habis di tengah giliran: tandai SEKALI per giliran.
+    var kunci = state.ronde + '|' + state.soal_id + '|' + state.tim_aktif;
+    if (tm.berjalan && sisa <= 0 && kunci !== kunciHabis) {
+      kunciHabis = kunci;
+      var hb = $('waktu-habis');
+      hb.style.display = 'block';
+      hb.classList.remove('anim-kedip');
+      void hb.offsetWidth;
+      hb.classList.add('anim-kedip');
+      if (SFX.siap()) SFX.buzzerX();
+      setTimeout(function () { hb.style.display = 'none'; }, 3000);
     }
   }, 250);
 

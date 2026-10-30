@@ -25,4 +25,14 @@ assets/sfx/          → kosong (untuk MP3 nanti)
 database.sql         → skema + admin bawaan + data contoh
 ```
 
+## Cara main (bergiliran)
+
+- Tim menjawab bergantian. **Benar** → poin × pengali langsung masuk skor tim.
+  **Salah** → skor dikurangi denda (bawaan 10, boleh minus).
+- Tiap giliran, **timer berjalan otomatis** (bawaan 30 detik, diatur di Pengaturan).
+  Waktu habis → host mencatat Salah/Benar/Lewati, giliran pindah + timer jalan lagi.
+- Ronde berakhir saat semua jawaban terbuka → soal berikutnya. Starter tiap ronde
+  bergiliran (bisa diubah sebelum jawaban pertama dibuka).
+- Skor tertinggi di akhir menang. 🏆
+
 ## Instalasi cPanel — LIHAT `INSTALL.md`

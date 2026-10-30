@@ -124,7 +124,7 @@ if ($aksi === 'mulai_kuis') {
   $st['steal'] = ['mode' => null, 'oleh' => null];
   $st['riwayat_soal'] = [(int)$soal['id']];
   $st['ronde_selesai'] = false;
-  $st['timer'] = ['berjalan' => false, 'sisa' => (int)$st['pengaturan']['timer_detik'], 'deadline' => null];
+  timer_jalan($st); // giliran pertama langsung berjalan + timer otomatis
   simpan_state($st, 'ronde_baru', ['ronde' => 1, 'tim_main' => 0]);
   $jawab_ok();
 }

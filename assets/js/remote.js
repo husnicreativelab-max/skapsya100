@@ -1,6 +1,7 @@
 /* =====================================================
-   Skapsya100 — Remote guru (HP). Wajib login + pairing.
-   Polling tiap 1 detik. Bisa setup cadangan + semua aksi kuis.
+   Skapsya100 — Remote guru (HP). Kuis BERGILIRAN.
+   Wajib login + pairing. Polling tiap 1 detik.
+   Timer berjalan otomatis tiap giliran (tanpa tombol).
    ===================================================== */
 (function () {
   'use strict';
@@ -126,21 +127,23 @@
     kait();
   }
 
+  function namaAktif() {
+    var t = (state.tim || [])[state.tim_aktif];
+    return t ? t.nama : '-';
+  }
+
   function kartuStatus() {
     var fase = { setup: '⚙️ Persiapan', kuis: '🎮 Kuis', selesai: '🏁 Selesai' }[state.fase] || state.fase;
     var h = '<div class="kartu"><h2>' + fase + '</h2><div class="status-ronde">';
     if (state.fase === 'kuis') {
-      h += '<span>Ronde <b>' + state.ronde + '</b></span><span>Bank <b>' + state.bank +
-        '</b> (×' + state.pengali + ')</span><span>X <b>' + state.x + '/3</b></span>';
-      var sm = state.steal ? state.steal.mode : null;
-      if (sm === 'siap') h += '<span>⚠️ <b>Steal SIAP</b></span>';
-      if (sm === 'aktif') h += '<span>🔥 <b>STEAL berlangsung</b></span>';
+      h += '<span>Ronde <b>' + state.ronde + '</b> (×' + state.pengali + ')</span>';
+      h += '<span>🎯 Giliran <b>' + esc(namaAktif()) + '</b></span>';
       if (state.ronde_selesai) h += '<span>✅ <b>Ronde selesai</b></span>';
-      h += '<span>⏱️ <b>' + timerTeks() + '</b></span>';
+      h += '<span>⏱️ <b>' + timerTeks() + '</b> (otomatis)</span>';
     }
     h += '</div>';
     (state.tim || []).forEach(function (t, i) {
-      var tandai = (state.fase === 'kuis' && i === state.tim_main) ? ' 🔻' : '';
+      var tandai = (state.fase === 'kuis' && i === state.tim_aktif) ? ' 🎯' : '';
       h += '<div>• ' + esc(t.nama) + tandai + ': <b>' + t.skor + '</b></div>';
     });
     h += '</div>';
@@ -175,7 +178,7 @@
   }
 
   function awalRonde() {
-    if (state.x > 0 || state.bank > 0) return false;
+    if (state.ronde_selesai) return false;
     for (var i = 0; i < (state.jawaban || []).length; i++) {
       if (state.jawaban[i].terbuka) return false;
     }
@@ -184,43 +187,36 @@
 
   function kartuKuis() {
     var h = '';
-    // Face-off
-    h += '<div class="kartu"><h2>🤝 Face-off: tim yang main</h2><div class="pilih-tim">';
+    var denda = (state.pengaturan && state.pengaturan.denda_salah) || 0;
+
+    // Giliran + papan jawaban (host mengetuk jawaban yang disebut tim)
+    h += '<div class="kartu"><h2>🎯 Giliran: ' + esc(namaAktif()) + '</h2>';
+    h += '<p>📋 ' + esc(state.pertanyaan || '') + '</p><div class="remote-grid">';
+    (state.jawaban || []).forEach(function (jb, i) {
+      var sudah = !!jb.terbuka;
+      h += '<button class="btn tombol-jawab' + (sudah ? ' sudah' : '') + '" data-kuis-buka="' + i + '"' +
+        (sudah || state.ronde_selesai ? ' disabled' : '') + '><span>' + (i + 1) + '. ' +
+        esc(jb.teks) + ' <small>(+' + (jb.poin * state.pengali) + ')</small></span>' +
+        '<span class="poin">' + (sudah ? '✓' : 'BENAR') + '</span></button>';
+    });
+    h += '</div></div>';
+
+    // Salah / lewati
+    h += '<div class="kartu"><h2>❌ / ⏭️ ' + esc(namaAktif()) + '</h2><div class="remote-grid">';
+    h += '<button class="btn btn-bahaya btn-besar" data-aksi="jawab_salah"' +
+      (state.ronde_selesai ? ' disabled' : '') + '>❌ SALAH (−' + denda + ' poin)</button>';
+    h += '<button class="btn" data-aksi="lewat_giliran"' +
+      (state.ronde_selesai ? ' disabled' : '') + '>⏭ Lewati giliran (tanpa denda)</button>';
+    h += '</div></div>';
+
+    // Tim mulai duluan (awal ronde)
+    h += '<div class="kartu"><h2>🏁 Tim mulai duluan</h2><div class="pilih-tim">';
     (state.tim || []).forEach(function (t, i) {
       h += '<button class="btn' + (state.tim_main === i ? ' btn-emas' : '') +
         '" data-kuis-main="' + i + '"' + (awalRonde() ? '' : ' disabled') + '>' +
         esc(t.nama) + '</button>';
     });
-    h += '</div>' + (awalRonde() ? '<small>Pemenang face-off pilih MAIN / OPER.</small>' : '<small>Ronde berjalan — terkunci.</small>') + '</div>';
-
-    // Soal + jawaban
-    h += '<div class="kartu"><h2>📋 ' + esc(state.pertanyaan || '') + '</h2><div class="remote-grid">';
-    (state.jawaban || []).forEach(function (jb, i) {
-      var sudah = !!jb.terbuka;
-      h += '<button class="btn tombol-jawab' + (sudah ? ' sudah' : '') + '" data-kuis-buka="' + i + '"' +
-        (sudah || state.ronde_selesai ? ' disabled' : '') + '><span>' + (i + 1) + '. ' +
-        esc(jb.teks) + ' <small>(' + jb.poin + '×' + state.pengali + ')</small></span>' +
-        '<span class="poin">' + (sudah ? '✓' : 'BUKA') + '</span></button>';
-    });
-    h += '</div></div>';
-
-    // X & steal
-    h += '<div class="kartu"><h2>❌ Salah / Steal</h2><div class="remote-grid">';
-    h += '<div class="pilih-tim"><button class="btn btn-bahaya" data-aksi="tambah_x">❌ Tambah X (' +
-      state.x + '/3)</button><button class="btn" data-aksi="kurang_x">↩ Kurangi X</button></div>';
-    var sm = state.steal ? state.steal.mode : null;
-    var oleh = state.steal ? state.steal.oleh : 0;
-    var namaLawan = state.tim[oleh] ? state.tim[oleh].nama : '';
-    if (sm === 'siap') {
-      h += '<button class="btn btn-emas btn-besar" data-aksi="mulai_steal">🔥 MULAI STEAL — ' +
-        esc(namaLawan) + '</button>';
-    } else if (sm === 'aktif') {
-      h += '<button class="btn btn-ok btn-besar" data-aksi="steal_benar">✅ STEAL BENAR — bank ke ' +
-        esc(namaLawan) + '</button>';
-      h += '<button class="btn btn-bahaya btn-besar" data-aksi="steal_gagal">❌ STEAL SALAH — bank ke ' +
-        esc(state.tim[state.tim_main].nama) + '</button>';
-    }
-    h += '</div></div>';
+    h += '</div>' + (awalRonde() ? '<small>Bisa diubah sebelum jawaban pertama dibuka.</small>' : '<small>Ronde berjalan — terkunci.</small>') + '</div>';
 
     // Ronde
     h += '<div class="kartu"><h2>⏭️ Ronde</h2><div class="remote-grid">';
@@ -228,17 +224,11 @@
     h += '<button class="btn" data-aksi="akhiri_kuis">🏁 Akhiri & tampilkan podium</button>';
     h += '</div></div>';
 
-    // Timer
-    h += '<div class="kartu"><h2>⏱️ Timer (' + timerTeks() + ')</h2><div class="pilih-tim">';
-    h += '<button class="btn btn-ok" data-aksi="timer_start">▶ Mulai</button>';
-    h += '<button class="btn" data-aksi="timer_stop">⏸ Stop</button>';
-    h += '<button class="btn" data-aksi="timer_reset">🔄 Reset</button></div></div>';
-
     // Koreksi
     h += '<div class="kartu"><h2>✏️ Koreksi</h2>';
     (state.tim || []).forEach(function (t, i) {
       h += '<div class="koreksi"><span style="flex:1">' + esc(t.nama) +
-        '</span><input type="number" id="skor-' + i + '" value="' + t.skor + '" min="0">' +
+        '</span><input type="number" id="skor-' + i + '" value="' + t.skor + '">' +
         '<button class="btn" data-kuis-skor="' + i + '">Set</button></div>';
       h += '<div class="edit-nama"><input id="nama-' + i + '" maxlength="20" value="' +
         esc(t.nama) + '"><button class="btn" data-kuis-nama="' + i + '">Nama OK</button></div>';
@@ -276,20 +266,14 @@
       b.onclick = function () {
         var a = b.getAttribute('data-aksi');
         if (a === 'mulai_kuis_setup') aksiSetup('mulai_kuis', {});
-        else if (a === 'tambah_x') aksiKuis('tambah_x', {});
-        else if (a === 'kurang_x') aksiKuis('kurang_x', {});
-        else if (a === 'mulai_steal') aksiKuis('mulai_steal', {});
-        else if (a === 'steal_benar') aksiKuis('steal_benar', {});
-        else if (a === 'steal_gagal') aksiKuis('steal_gagal', {});
+        else if (a === 'jawab_salah') aksiKuis('jawab_salah', {});
+        else if (a === 'lewat_giliran') aksiKuis('lewat_giliran', {});
         else if (a === 'soal_berikutnya') {
           if (state.ronde_selesai) aksiKuis('soal_berikutnya', {});
-          else aksiKuis('soal_berikutnya', { paksa: 1 }, 'Ronde belum selesai. Paksa lanjut? (bank ' + state.bank + ' hangus)');
+          else aksiKuis('soal_berikutnya', { paksa: 1 }, 'Ronde belum selesai. Paksa lanjut ke soal berikutnya?');
         }
         else if (a === 'akhiri_kuis') aksiKuis('akhiri_kuis', {}, 'Akhiri kuis & tampilkan podium?');
         else if (a === 'kembali_setup') aksiKuis('kembali_setup', {}, 'Kembali ke setup?');
-        else if (a === 'timer_start') aksiKuis('timer_start', {});
-        else if (a === 'timer_stop') aksiKuis('timer_stop', {});
-        else if (a === 'timer_reset') aksiKuis('timer_reset', {});
         else if (a === 'musik_toggle') aksiKuis('set_musik', { musik: !(state.pengaturan && state.pengaturan.musik) });
       };
     });

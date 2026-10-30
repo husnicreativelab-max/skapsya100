@@ -1,5 +1,5 @@
 <?php
-// Pengaturan: pengali ronde, timer, volume, musik, reset sesi, ganti password.
+// Pengaturan: pengali ronde, timer, denda salah, volume, musik, reset sesi.
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../includes/game.php';
 wajib_login();
@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'pengali_r3' => max(1, min(9, (int)($_POST['pengali_r3'] ?? 2))),
         'pengali_r4' => max(1, min(9, (int)($_POST['pengali_r4'] ?? 3))),
         'timer_detik' => max(5, min(300, (int)($_POST['timer_detik'] ?? 30))),
+        'denda_salah' => max(0, min(100, (int)($_POST['denda_salah'] ?? 10))),
         'volume' => max(0, min(100, (int)($_POST['volume'] ?? 80))),
         'musik' => isset($_POST['musik']) ? '1' : '0',
       ];
@@ -36,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $st['pengaturan']['pengali_r3'] = $nilai['pengali_r3'];
       $st['pengaturan']['pengali_r4'] = $nilai['pengali_r4'];
       $st['pengaturan']['timer_detik'] = $nilai['timer_detik'];
+      $st['pengaturan']['denda_salah'] = $nilai['denda_salah'];
       $st['pengaturan']['volume'] = $nilai['volume'];
       $st['pengaturan']['musik'] = $nilai['musik'] === '1';
       if ($st['fase'] === 'kuis') {
@@ -55,6 +57,7 @@ $p = [
   'pengali_r3' => pengaturan('pengali_r3', '2'),
   'pengali_r4' => pengaturan('pengali_r4', '3'),
   'timer_detik' => pengaturan('timer_detik', '30'),
+  'denda_salah' => pengaturan('denda_salah', '10'),
   'volume' => pengaturan('volume', '80'),
   'musik' => pengaturan('musik', '1'),
 ];
@@ -72,11 +75,13 @@ tampil_pesan();
     <label>Ronde 3 (×)<input type="number" name="pengali_r3" min="1" max="9" value="<?= e($p['pengali_r3']) ?>"></label>
     <label>Ronde 4+ (×)<input type="number" name="pengali_r4" min="1" max="9" value="<?= e($p['pengali_r4']) ?>"></label>
   </div>
-  <h2 class="subjudul">Timer & suara</h2>
+  <h2 class="subjudul">Giliran & denda</h2>
   <div class="baris2">
-    <label>Timer bawaan (detik)<input type="number" name="timer_detik" min="5" max="300" value="<?= e($p['timer_detik']) ?>"></label>
-    <label>Volume (0-100)<input type="number" name="volume" min="0" max="100" value="<?= e($p['volume']) ?>"></label>
+    <label>Timer tiap giliran (detik, otomatis)<input type="number" name="timer_detik" min="5" max="300" value="<?= e($p['timer_detik']) ?>"></label>
+    <label>Denda jawaban salah (poin)<input type="number" name="denda_salah" min="0" max="100" value="<?= e($p['denda_salah']) ?>"></label>
   </div>
+  <h2 class="subjudul">Suara</h2>
+  <label>Volume (0-100)<input type="number" name="volume" min="0" max="100" value="<?= e($p['volume']) ?>"></label>
   <label class="cek"><input type="checkbox" name="musik" value="1" <?= $p['musik'] === '1' ? 'checked' : '' ?>>
     Musik latar menyala</label>
   <button class="btn btn-primer btn-besar" type="submit">Simpan Pengaturan</button>

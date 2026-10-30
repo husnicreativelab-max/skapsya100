@@ -149,6 +149,16 @@
 }
 .kotak-tim.main .panah { animation: panah-geser .4s ease; }
 
+@keyframes toast-masuk {
+  from { transform: translate(-50%, -50%) scale(.7); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+@keyframes giliran-kedip {
+  0%, 100% { box-shadow: 0 0 0 rgba(255,209,102,0); }
+  50% { box-shadow: 0 0 4vmin rgba(255,209,102,.95); }
+}
+.anim-giliran { animation: giliran-kedip .6s ease 3; }
+
 /* Pemenang */
 @keyframes juara-naik {
   from { transform: translateY(30vmin); opacity: 0; }

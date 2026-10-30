@@ -1,7 +1,6 @@
 <?php
 // Layar proyektor: beranda, setup, papan kuis, podium.
-// - Saat setup: boleh mengirim aksi setup (display_token).
-// - Saat kuis: READ-ONLY (hanya polling + animasi + suara).
+// Kuis BERGILIRAN, display READ-ONLY (hanya polling + animasi + suara).
 require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php + fungsi e()
 ?>
 <!DOCTYPE html>
@@ -85,8 +84,7 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
   </section>
 </main>
 
-<!-- Indikator -->
-<div class="indikator-x" id="indikator-x"></div>
+<!-- Timer otomatis tiap giliran -->
 <div class="timer-lingkaran" id="timer-box">
   <svg viewBox="0 0 100 100">
     <circle cx="50" cy="50" r="46" fill="rgba(0,0,0,.4)" stroke="#ffffff33" stroke-width="8"/>
@@ -95,11 +93,18 @@ require_once __DIR__ . '/../includes/db.php'; // db.php sudah memuat config.php 
   </svg>
   <b id="timer-angka">30</b>
 </div>
+<div class="waktu-habis" id="waktu-habis" style="display:none">⏰ WAKTU HABIS!</div>
 
 <!-- Overlay efek -->
-<div class="overlay" id="overlay-x"><div class="x-raksasa">✕</div></div>
-<div class="overlay" id="overlay-x3"><div class="x-tiga"><span>✕</span><span>✕</span><span>✕</span></div></div>
-<div class="overlay" id="overlay-steal"><div class="teks-steal anim-kedip">🔥 STEAL! 🔥</div></div>
+<div class="overlay" id="overlay-x">
+  <div style="text-align:center">
+    <div class="x-raksasa">✕</div>
+    <div class="x-sub" id="x-sub"></div>
+  </div>
+</div>
+
+<!-- Pesan tengah (papan habis, giliran, dll) -->
+<div class="toast-tengah" id="toast"></div>
 
 <div id="pesan-display" class="pesan galat" style="display:none;position:fixed;bottom:8vmin;left:50%;transform:translateX(-50%);z-index:400"></div>
 <button class="tombol-suara" id="btn-suara">🔈 Aktifkan Suara</button>

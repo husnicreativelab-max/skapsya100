@@ -19,7 +19,8 @@ tampil_pesan();
     <h2>Status sesi</h2>
     <p class="fase"><?= e($fase_label[$st['fase']] ?? $st['fase']) ?></p>
     <?php if ($st['fase'] === 'kuis'): ?>
-      <p>Ronde <?= (int)$st['ronde'] ?> • Bank <b><?= (int)$st['bank'] ?></b> • X: <?= (int)$st['x'] ?></p>
+      <p>Ronde <?= (int)$st['ronde'] ?> (×<?= (int)$st['pengali'] ?>) • Giliran:
+        <b><?= e($st['tim'][(int)$st['tim_aktif']]['nama'] ?? '-') ?></b></p>
       <?php foreach (($st['tim'] ?? []) as $t): ?>
         <p>• <?= e($t['nama']) ?>: <b><?= (int)$t['skor'] ?></b></p>
       <?php endforeach; ?>

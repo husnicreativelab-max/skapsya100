@@ -1,5 +1,8 @@
 <?php
-// Aksi KUIS: HANYA admin login (remote guru). Display read-only.
+// Aksi KUIS bergiliran: HANYA admin login (remote guru). Display read-only.
+// - Benar: poin × pengali LANGSUNG ke skor tim yang giliran, lalu giliran pindah.
+// - Salah: skor tim dikurangi denda (boleh minus), lalu giliran pindah.
+// - Tiap giliran dimulai, timer berjalan otomatis (tanpa tombol remote).
 require_once __DIR__ . '/../includes/game.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/csrf.php';
@@ -40,110 +43,73 @@ $wajib_kuis = function () use ($st, $gagal) {
 
 $n_tim = count($st['tim'] ?? []);
 
-// ---------- Buka jawaban benar (nomor = indeks papan, 0 = teratas) ----------
+// ---------- Jawaban BENAR: poin langsung ke tim yang giliran ----------
 if ($aksi === 'buka_jawaban') {
   $wajib_kuis();
   if (!empty($st['ronde_selesai'])) $gagal('Ronde sudah selesai. Lanjut soal berikutnya.');
-  $mode_steal = $st['steal']['mode'] ?? null;
-  if ($mode_steal === 'aktif' || $mode_steal === 'siap') $gagal('Sedang mode steal. Selesaikan steal dulu.');
   $nomor = (int)($input['nomor'] ?? -1);
   if (!isset($st['jawaban'][$nomor])) $gagal('Nomor jawaban tidak valid.');
   if (!empty($st['jawaban'][$nomor]['terbuka'])) $gagal('Jawaban sudah terbuka.');
   $st['jawaban'][$nomor]['terbuka'] = true;
+  $aktif = (int)$st['tim_aktif'];
   $poin = (int)$st['jawaban'][$nomor]['poin'] * (int)$st['pengali'];
-  $st['bank'] += $poin;
+  $st['tim'][$aktif]['skor'] += $poin;
   $is_top = ($nomor === 0);
-  // Semua terbuka? Bank langsung masuk ke tim yang main.
+  // Semua terbuka? Ronde selesai, timer berhenti.
   $semua = true;
   foreach ($st['jawaban'] as $j) if (empty($j['terbuka'])) $semua = false;
   if ($semua) {
-    $tm = (int)$st['tim_main'];
-    $st['tim'][$tm]['skor'] += $st['bank'];
-    $bank = $st['bank'];
     $st['ronde_selesai'] = true;
-    simpan_state($st, 'bank_masuk', ['tim' => $tm, 'bank' => $bank, 'nomor' => $nomor, 'top' => $is_top]);
+    timer_berhenti($st);
+    simpan_state($st, $is_top ? 'top' : 'benar', [
+      'nomor' => $nomor, 'poin' => $poin, 'tim' => $aktif,
+      'skor' => (int)$st['tim'][$aktif]['skor'], 'ronde_selesai' => true,
+    ]);
     $jawab_ok();
   }
-  simpan_state($st, $is_top ? 'top' : 'benar', ['nomor' => $nomor, 'poin' => $poin, 'bank' => $st['bank']]);
+  giliran_berikut($st); // pindah tim + timer otomatis jalan
+  simpan_state($st, $is_top ? 'top' : 'benar', [
+    'nomor' => $nomor, 'poin' => $poin, 'tim' => $aktif,
+    'skor' => (int)$st['tim'][$aktif]['skor'], 'giliran' => (int)$st['tim_aktif'],
+  ]);
   $jawab_ok();
 }
 
-// ---------- Tambah X (jawaban salah) ----------
-if ($aksi === 'tambah_x') {
+// ---------- Jawaban SALAH: skor dikurangi denda, giliran pindah ----------
+if ($aksi === 'jawab_salah') {
   $wajib_kuis();
-  if (!empty($st['ronde_selesai'])) $gagal('Ronde sudah selesai.');
-  if (($st['steal']['mode'] ?? null) === 'aktif') $gagal('Sedang mode steal.');
-  if ((int)$st['x'] >= 3) $gagal('X sudah 3. Mulai steal.');
-  $st['x']++;
-  if ((int)$st['x'] >= 3) {
-    // Lawan = tim sesudah tim yang main (giliran).
-    $lawan = $n_tim > 0 ? ((int)$st['tim_main'] + 1) % $n_tim : 0;
-    $st['steal'] = ['mode' => 'siap', 'oleh' => $lawan];
-    simpan_state($st, 'x3', ['oleh' => $lawan]);
-    $jawab_ok();
-  }
-  simpan_state($st, 'x', ['x' => (int)$st['x']]);
+  if (!empty($st['ronde_selesai'])) $gagal('Ronde sudah selesai. Lanjut soal berikutnya.');
+  $aktif = (int)$st['tim_aktif'];
+  $denda = max(0, (int)($st['pengaturan']['denda_salah'] ?? 10));
+  $st['tim'][$aktif]['skor'] -= $denda; // boleh minus
+  giliran_berikut($st);
+  simpan_state($st, 'x', [
+    'tim' => $aktif, 'denda' => $denda,
+    'skor' => (int)$st['tim'][$aktif]['skor'], 'giliran' => (int)$st['tim_aktif'],
+  ]);
   $jawab_ok();
 }
 
-// Batalkan satu X (koreksi host).
-if ($aksi === 'kurang_x') {
+// ---------- Lewati giliran (misal waktu habis): tanpa denda ----------
+if ($aksi === 'lewat_giliran') {
   $wajib_kuis();
-  if (!empty($st['ronde_selesai'])) $gagal('Ronde sudah selesai.');
-  if ((int)$st['x'] <= 0) $gagal('Belum ada X.');
-  if ((int)$st['x'] >= 3) $gagal('Sudah 3X, selesaikan steal dulu.');
-  $st['x']--;
-  simpan_state($st);
+  if (!empty($st['ronde_selesai'])) $gagal('Ronde sudah selesai. Lanjut soal berikutnya.');
+  $dari = (int)$st['tim_aktif'];
+  giliran_berikut($st);
+  simpan_state($st, 'giliran', ['dari' => $dari, 'tim' => (int)$st['tim_aktif']]);
   $jawab_ok();
 }
 
-// ---------- Steal: mulai -> lawan menjawab -> benar/gagal ----------
-if ($aksi === 'mulai_steal') {
-  $wajib_kuis();
-  if (($st['steal']['mode'] ?? null) !== 'siap') $gagal('Steal belum siap (butuh 3X).');
-  $st['steal']['mode'] = 'aktif';
-  simpan_state($st, 'steal', ['oleh' => (int)$st['steal']['oleh']]);
-  $jawab_ok();
-}
-if ($aksi === 'steal_benar') {
-  $wajib_kuis();
-  if (($st['steal']['mode'] ?? null) !== 'aktif') $gagal('Steal belum aktif.');
-  $oleh = (int)$st['steal']['oleh'];
-  $st['tim'][$oleh]['skor'] += $st['bank'];
-  $bank = $st['bank'];
-  $st['steal']['mode'] = 'selesai';
-  $st['ronde_selesai'] = true;
-  // Buka semua sisa jawaban agar penonton melihat papan lengkap.
-  foreach ($st['jawaban'] as &$j) $j['terbuka'] = true;
-  unset($j);
-  simpan_state($st, 'steal_berhasil', ['tim' => $oleh, 'bank' => $bank]);
-  $jawab_ok();
-}
-if ($aksi === 'steal_gagal') {
-  $wajib_kuis();
-  if (($st['steal']['mode'] ?? null) !== 'aktif') $gagal('Steal belum aktif.');
-  $tm = (int)$st['tim_main'];
-  $st['tim'][$tm]['skor'] += $st['bank'];
-  $bank = $st['bank'];
-  $st['steal']['mode'] = 'selesai';
-  $st['ronde_selesai'] = true;
-  // Buka semua sisa jawaban agar penonton melihat papan lengkap.
-  foreach ($st['jawaban'] as &$j) $j['terbuka'] = true;
-  unset($j);
-  simpan_state($st, 'steal_gagal', ['tim' => $tm, 'bank' => $bank]);
-  $jawab_ok();
-}
-
-// ---------- Face-off: tentukan tim yang main (main/oper) ----------
-// Hanya di awal ronde (belum ada jawaban terbuka, X=0, bank=0).
+// ---------- Tim yang mulai duluan di ronde ini (awal ronde saja) ----------
 if ($aksi === 'set_tim_main') {
   $wajib_kuis();
   $t = (int)($input['tim'] ?? -1);
   if ($t < 0 || $t >= $n_tim) $gagal('Tim tidak valid.');
+  if (!empty($st['ronde_selesai'])) $gagal('Ronde sudah selesai.');
   foreach ($st['jawaban'] as $j) if (!empty($j['terbuka'])) $gagal('Ronde sudah berjalan.');
-  if ((int)$st['x'] > 0 || (int)$st['bank'] > 0) $gagal('Ronde sudah berjalan.');
   $st['tim_main'] = $t;
   $st['tim_aktif'] = $t;
+  timer_jalan($st); // timer starter ronde berjalan otomatis
   simpan_state($st);
   $jawab_ok();
 }
@@ -160,6 +126,7 @@ if ($aksi === 'soal_berikutnya') {
   // Soal habis -> permainan selesai, tentukan pemenang.
   if (!$soal) {
     $st['fase'] = 'selesai';
+    timer_berhenti($st);
     $menang = 0;
     foreach ($st['tim'] as $i => $t) {
       if ((int)$t['skor'] > (int)$st['tim'][$menang]['skor']) $menang = $i;
@@ -180,20 +147,20 @@ if ($aksi === 'soal_berikutnya') {
   $st['steal'] = ['mode' => null, 'oleh' => null];
   $st['riwayat_soal'][] = (int)$soal['id'];
   $st['ronde_selesai'] = false;
-  // Starter ronde bergiliran (bisa diubah lagi via face-off).
+  // Starter ronde bergiliran (bisa diubah lagi sebelum jawaban dibuka).
   $tm = $n_tim > 0 ? ($ronde - 1) % $n_tim : 0;
   $st['tim_main'] = $tm;
   $st['tim_aktif'] = $tm;
-  $st['timer'] = ['berjalan' => false, 'sisa' => (int)$st['pengaturan']['timer_detik'], 'deadline' => null];
+  timer_jalan($st); // timer ronde baru langsung berjalan
   simpan_state($st, 'ronde_baru', ['ronde' => $ronde, 'tim_main' => $tm]);
   $jawab_ok();
 }
 
-// ---------- Koreksi skor & nama tim ----------
+// ---------- Koreksi skor (boleh minus) & nama tim ----------
 if ($aksi === 'koreksi_skor') {
   $t = (int)($input['tim'] ?? -1);
-  $skor = (int)($input['skor'] ?? -1);
-  if ($t < 0 || $t >= $n_tim || $skor < 0 || $skor > 100000) $gagal('Skor tidak valid.');
+  $skor = (int)($input['skor'] ?? -9999999);
+  if ($t < 0 || $t >= $n_tim || $skor < -100000 || $skor > 100000) $gagal('Skor tidak valid.');
   $st['tim'][$t]['skor'] = $skor;
   simpan_state($st);
   $jawab_ok();
@@ -236,7 +203,7 @@ if ($aksi === 'kembali_setup') {
     $st['setup']['tim'] = $setup_tim;
     $st['setup']['jumlah_tim'] = count($setup_tim);
   }
-  $st['timer'] = ['berjalan' => false, 'sisa' => (int)$st['pengaturan']['timer_detik'], 'deadline' => null];
+  timer_berhenti($st);
   simpan_state($st, 'ke_setup', []);
   $jawab_ok();
 }
@@ -245,6 +212,7 @@ if ($aksi === 'kembali_setup') {
 if ($aksi === 'akhiri_kuis') {
   if ($st['fase'] !== 'kuis') $gagal('Kuis tidak sedang berjalan.');
   $st['fase'] = 'selesai';
+  timer_berhenti($st);
   $menang = 0;
   foreach ($st['tim'] as $i => $t) {
     if ((int)$t['skor'] > (int)$st['tim'][$menang]['skor']) $menang = $i;
@@ -267,7 +235,7 @@ if ($aksi === 'set_musik') {
   $jawab_ok();
 }
 
-// ---------- Timer (opsional) ----------
+// ---------- Timer cadangan (umumnya otomatis; tak dipakai remote) ----------
 if ($aksi === 'timer_start') {
   $wajib_kuis();
   $sisa = (int)($st['timer']['sisa'] ?? 0);
@@ -277,8 +245,7 @@ if ($aksi === 'timer_start') {
   $jawab_ok();
 }
 if ($aksi === 'timer_stop') {
-  $st['timer']['berjalan'] = false;
-  $st['timer']['deadline'] = null;
+  timer_berhenti($st);
   simpan_state($st);
   $jawab_ok();
 }

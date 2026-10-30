@@ -86,6 +86,7 @@ INSERT INTO `settings` (`kunci`, `nilai`) VALUES
 ('pengali_r3', '2'),
 ('pengali_r4', '3'),
 ('timer_detik', '30'),
+('denda_salah', '10'),
 ('volume', '80'),
 ('musik', '1')
 ON DUPLICATE KEY UPDATE `nilai` = VALUES(`nilai`);

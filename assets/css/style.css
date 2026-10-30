@@ -259,6 +259,30 @@ body.display {
 }
 .kotak-bank .label { font-size: 2vmin; letter-spacing: .5vmin; color: var(--emas); }
 .kotak-bank .nilai { font-size: 5vmin; font-weight: 900; }
+.tag-giliran {
+  display: inline-block; font-size: 1.7vmin; font-weight: 900; color: #0b1e3a;
+  background: var(--emas); border-radius: 999px; padding: .3vmin 1.8vmin; margin-bottom: .4vmin;
+}
+.tag-giliran.semu { background: transparent; }
+.kotak-tim.main { box-shadow: 0 0 2.4vmin rgba(255,209,102,.55); }
+/* Pesan tengah layar */
+.toast-tengah {
+  position: fixed; top: 36%; left: 50%; z-index: 160; pointer-events: none;
+  transform: translate(-50%, -50%) scale(.7); opacity: 0;
+  background: rgba(0,0,0,.82); border: 3px solid var(--emas); border-radius: 18px;
+  color: #fff; font-size: 3.6vmin; font-weight: 800; padding: 2vmin 4vmin;
+  text-align: center; max-width: 88vw;
+}
+.toast-tengah.tampil { animation: toast-masuk .35s ease forwards; }
+/* Tanda waktu habis */
+.waktu-habis {
+  position: fixed; bottom: 3vmin; left: 50%; transform: translateX(-50%); z-index: 120;
+  background: var(--bahaya); color: #fff; font-size: 3.4vmin; font-weight: 900;
+  border-radius: 999px; padding: 1vmin 4vmin; border: 3px solid #fff;
+  box-shadow: 0 0 3vmin #d90429cc;
+}
+/* Sub-teks X (nama tim + minus) */
+.x-sub { font-size: 6vmin; font-weight: 900; color: #fff; text-shadow: 0 4px 0 #000; margin-top: 1vmin; }
 .papan-pertanyaan {
   width: min(130vmin, 96vw); background: linear-gradient(180deg, #274b86, #182c55);
   border: 3px solid #ffffff33; border-radius: 16px; padding: 1.6vmin 3vmin; text-align: center;

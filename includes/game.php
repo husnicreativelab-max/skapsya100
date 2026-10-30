@@ -1,5 +1,7 @@
 <?php
 // Mesin state kuis di sisi server. SEMUA hitungan skor hanya di sini.
+// Mekanisme BERGILIRAN: tim yang giliran menjawab; benar +poin langsung,
+// salah −denda langsung; tiap giliran timer berjalan otomatis.
 require_once __DIR__ . '/db.php';
 
 // Palet warna tim (maks 4 tim).
@@ -24,8 +26,8 @@ function state_bawaan(): array {
     'fase' => 'setup',
     'setup' => ['jumlah_tim' => 2, 'tim' => $tim, 'kategori_id' => null],
     'tim' => [],
-    'tim_aktif' => 0,
-    'tim_main' => 0,
+    'tim_aktif' => 0,   // giliran berjalan
+    'tim_main' => 0,    // starter ronde ini
     'ronde' => 1,
     'soal_id' => null,
     'pertanyaan' => '',
@@ -33,7 +35,7 @@ function state_bawaan(): array {
     'x' => 0,
     'bank' => 0,
     'pengali' => 1,
-    'steal' => ['mode' => null, 'oleh' => null], // mode: null|siap|aktif|selesai
+    'steal' => ['mode' => null, 'oleh' => null],
     'riwayat_soal' => [],
     'ronde_selesai' => false,
     'event_seq' => 0,
@@ -44,6 +46,7 @@ function state_bawaan(): array {
       'pengali_r3' => (int)pengaturan('pengali_r3', '2'),
       'pengali_r4' => (int)pengaturan('pengali_r4', '3'),
       'timer_detik' => (int)pengaturan('timer_detik', '30'),
+      'denda_salah' => (int)pengaturan('denda_salah', '10'),
       'volume' => (int)pengaturan('volume', '80'),
       'musik' => pengaturan('musik', '1') === '1',
     ],
@@ -70,7 +73,7 @@ function ambil_state(): array {
     $d = json_decode($row['state_json'], true);
     if (is_array($d)) {
       foreach ($d as $k => $v) $st[$k] = $v;
-      // Gabung dalam: pengaturan & timer (agar tidak hilang saat update)
+      // Gabung dalam: pengaturan (agar kunci baru tak hilang di sesi lama)
       if (isset($d['pengaturan']) && is_array($d['pengaturan'])) {
         $st['pengaturan'] = array_merge(state_bawaan()['pengaturan'], $d['pengaturan']);
       }
@@ -117,6 +120,26 @@ function pengali_ronde(array $peng, int $ronde): int {
   if ($ronde == 2) return max(1, (int)($peng['pengali_r2'] ?? 1));
   if ($ronde == 3) return max(1, (int)($peng['pengali_r3'] ?? 2));
   return max(1, (int)($peng['pengali_r4'] ?? 3));
+}
+
+// PINDAHKAN giliran ke tim berikut + jalankan timer otomatis.
+function giliran_berikut(array &$st): void {
+  $n = count($st['tim'] ?? []);
+  if ($n > 0) $st['tim_aktif'] = ((int)$st['tim_aktif'] + 1) % $n;
+  timer_jalan($st);
+}
+
+// Jalankan (ulang) timer giliran secara otomatis.
+function timer_jalan(array &$st): void {
+  $d = (int)($st['pengaturan']['timer_detik'] ?? 30);
+  if ($d < 5) $d = 5;
+  if ($d > 300) $d = 300;
+  $st['timer'] = ['berjalan' => true, 'sisa' => $d, 'deadline' => time() + $d];
+}
+
+// Hentikan timer (ronde/game selesai).
+function timer_berhenti(array &$st): void {
+  $st['timer'] = ['berjalan' => false, 'sisa' => 0, 'deadline' => null];
 }
 
 // Ambil soal + jawaban (terurut poin terbesar dulu).
